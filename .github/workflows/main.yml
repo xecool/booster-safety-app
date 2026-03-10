@@ -1,0 +1,31 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main ]  # ทำงานทุกครั้งที่อัปโหลดโค้ดลง branch main
+  workflow_dispatch:      # ยอมให้กดปุ่มรันเองได้
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Get Date
+      id: get-date
+      run: |
+        echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+
+    - name: Buildozer Action
+      uses: kivy/buildozer-action@v1
+      id: buildozer
+      with:
+        workdir: .
+        buildozer_version: stable
+
+    - name: Upload APK
+      uses: actions/abstract-action/upload-artifact@v1
+      with:
+        name: booster-safety-apk-${{ steps.get-date.outputs.date }}
+        path: ${{ steps.buildozer.outputs.filename }}
